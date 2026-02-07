@@ -139,20 +139,29 @@ opencode run --model opencode/glm-4.7-free "获取最新代码"
 crontab -e
 
 # 添加定时任务（确保使用完整路径）
-/usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码" >> /tmp/opencode.log 2>&1
+cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码" >> /tmp/opencode.log 2>&1
 ```
 
 **示例时间设置**：
 
 ```bash
 # 每天凌晨 2 点执行
-0 2 * * * /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码" >> /tmp/opencode.log 2>&1
+0 2 * * * cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "切换到 main 分支并获取最新代码" >> /tmp/opencode.log 2>&1
 
 # 每天上午 9 点执行
-0 9 * * * /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码" >> /tmp/opencode.log 2>&1
+0 9 * * * cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "切换到 main 分支并获取最新代码" >> /tmp/opencode.log 2>&1
 
 # 每 6 小时执行一次
-0 */6 * * * /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码" >> /tmp/opencode.log 2>&1
+0 */6 * * * cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "切换到 main 分支并获取最新代码" >> /tmp/opencode.log 2>&1
+
+# 切换到 dev 分支并获取代码
+30 8 * * * cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "切换到 dev 分支并获取最新代码" >> /tmp/opencode.log 2>&1
+```
+
+**要点说明**：
+- `cd /home/opencode/workspace/crontab-ui` - 先切换到项目目录
+- 任务描述中明确说明"切换到 X 分支并获取最新代码"
+- 使用 `&&` 连接多个命令，确保逐个执行
 ```
 
 ### 注意事项
