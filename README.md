@@ -178,6 +178,7 @@ sudo systemctl restart crontab-guru-dashboard
   - 快速开始：修改 docker-compose.yml、重建容器、验证挂载
   - 工作原理：容器如何通过挂载写入宿主机 cron 目录
   - 使用示例：在仪表盘创建任务、使用 Docker socket、cron 作业示例
+  - 高级技巧：任务超时控制（使用 timeout 命令）
   - 问题排查：任务未执行、配置无变化、权限问题、文件不生效
   - 安全建议
 
@@ -186,6 +187,7 @@ sudo systemctl restart crontab-guru-dashboard
   - 方案二：使用 OpenCode AI
   - OpenCode run 正确用法（解决卡死问题）
   - 常用 Cron 时间表达式
+  - 高级技巧：任务超时控制（正确使用 timeout）
   - 完整示例：每日自动合并与备份
   - 调试技巧和进阶技巧
 
