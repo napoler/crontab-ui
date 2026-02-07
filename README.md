@@ -170,6 +170,30 @@ docker compose up -d --build
 sudo systemctl restart crontab-guru-dashboard
 ```
 
+## 📚 详细文档
+
+### 使用指南
+
+- **[DOCKER_CRON_SYNC.md](./DOCKER_CRON_SYNC.md)** - Docker 容器管理宿主机 cron 完整指南
+  - 快速开始：修改 docker-compose.yml、重建容器、验证挂载
+  - 工作原理：容器如何通过挂载写入宿主机 cron 目录
+  - 使用示例：在仪表盘创建任务、使用 Docker socket、cron 作业示例
+  - 问题排查：任务未执行、配置无变化、权限问题、文件不生效
+  - 安全建议
+
+- **[CRON_AUTOMATION.md](./CRON_AUTOMATION.md)** - Cron 自动化使用文档
+  - 方案一：使用 Git 命令（推荐，免费且稳定）
+  - 方案二：使用 OpenCode AI
+  - OpenCode run 正确用法（解决卡死问题）
+  - 常用 Cron 时间表达式
+  - 完整示例：每日自动合并与备份
+  - 调试技巧和进阶技巧
+
+### 脚本示例
+
+- `scripts/auto-merge.sh` - 自动拉取和合并代码脚本
+- `scripts/backup.sh` - 数据库备份脚本模板
+
 ## 帮助资源
 
 - 官方文档: https://crontab.guru/dashboard.html
