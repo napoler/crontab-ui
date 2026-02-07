@@ -10,11 +10,8 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - cronitor-data:/root/.config/cronitor
       - /etc/cron.d:/etc/cron.d
       - /var/spool/cron:/var/spool/cron
+      - /etc/crontab:/etc/crontab
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-
-volumes:
-  cronitor-data:
