@@ -271,10 +271,79 @@ crontab -l /etc/cron.d/git-pull
 2. **使用 IP 白名单**：限制访问来源
 3. **使用 SSH 隧道**：推荐的安全访问方式
 4. **定期审计**：检查 cron 任务是否有异常
+5. **限制超时时间**：防止任务无限运行消耗资源
 
 ```bash
 # 配置 IP 白名单
 docker exec -it crontab-guru-dashboard cronitor configure --allow-ips 192.168.1.0/24,10.0.0.1
+```
+
+## 高级技巧：任务超时控制
+
+在仪表盘管理的 cron 任务中使用超时控制，防止长时间运行的任务阻塞系统资源。
+
+### 基本语法
+
+```bash
+timeout [选项] 持续时间 命令
+```
+
+**时间单位**：
+- `s` - 秒
+- `m` - 分钟
+- `h` - 小时
+- `d` - 天
+
+### 在仪表盘中使用超时示例
+
+```cron
+# Git 拉取（最多 10 分钟）
+0 2 * * * timeout 10m sh -c 'cd /home/myproject && git pull origin main' >> /tmp/git.log 2>&1
+
+# 备份脚本（最多 1 小时）
+0 3 * * * timeout 1h /home/backup/scripts/daily-backup.sh >> /tmp/backup.log 2>&1
+
+# Docker 容器任务（最多 30 分钟）
+0 4 * * * timeout 30m docker exec my-app-container /app/process.sh >> /tmp/process.log 2>&1
+
+# OpenCode AI 任务（最多 30 分钟）
+0 9 * * * timeout 30m sh -c 'cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"' >> /tmp/opencode.log 2>&1
+```
+
+### 正确使用方式对比
+
+```cron
+# ✅ 正确：使用 sh -c 包裹所有命令
+0 9 * * * timeout 30m sh -c 'cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"' >> /tmp/opencode.log 2>&1
+
+# ✅ 正确：使用子 shell
+0 9 * * * timeout 30m (cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码") >> /tmp/opencode.log 2>&1
+
+# ❌ 错误：timeout 只对 cd 生效
+0 9 * * * timeout 30m cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"
+```
+
+### 高级选项示例
+
+```cron
+# 超时后发送 TERM 信号，10 秒后发送 KILL 信号
+0 2 * * * timeout -k 10s 1h /path/to/script.sh >> /tmp/task.log 2>&1
+
+# 使用特定信号
+0 3 * * * timeout -s SIGQUIT 15m /path/to/script.sh >> /tmp/task.log 2>&1
+```
+
+### 监控超时任务
+
+```bash
+# 查看超时的 cron 任务（退出码 124）
+grep "exit status 124" /var/log/syslog | grep CRON
+
+# 创建超时日志记录
+timeout 300 /path/to/script.sh 2>> /var/log/timeout.log
+
+# 监控超时日志
+tail -f /var/log/timeout.log
 ```
 
 ## 参考资源

@@ -339,6 +339,108 @@ echo "HOME: $HOME"
 
 ## 进阶技巧
 
+### 任务超时控制
+
+Cron 本身不支持超时，但可以通过 `timeout` 命令实现。
+
+#### 基本语法
+
+```bash
+timeout [选项] 持续时间 命令
+```
+
+**时间单位**：
+- `s` - 秒
+- `m` - 分钟
+- `h` - 小时
+- `d` - 天
+
+#### 正确使用方式
+
+**✅ 使用 sh -c 包裹所有命令**：
+```bash
+# 对整个命令块设置超时
+0 9 * * * timeout 30m sh -c 'cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"' >> /tmp/opencode.log 2>&1
+```
+
+**✅ 使用子 shell**：
+```bash
+0 9 * * * timeout 30m (cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码") >> /tmp/opencode.log 2>&1
+```
+
+**✅ 使用包装脚本**：
+
+创建 `scripts/fetch-with-timeout.sh`:
+```bash
+#!/bin/bash
+cd /home/opencode/workspace/crontab-ui
+/usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"
+```
+
+crontab:
+```bash
+0 9 * * * timeout 30m /home/opencode/workspace/crontab-ui/scripts/fetch-with-timeout.sh >> /tmp/opencode.log 2>&1
+```
+
+**❌ 错误：timeout 只对第一个命令生效**：
+```bash
+# ⚠️ 错误：timeout 只对 cd 命令生效
+0 9 * * * timeout 30m cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"
+```
+
+#### 实用示例
+
+```bash
+# Git 自动合并（最多 10 分钟）
+0 2 * * * timeout 10m sh -c 'cd /home/opencode/workspace/crontab-ui && git pull origin main --no-edit' >> /tmp/git.log 2>&1
+
+# OpenCode AI 任务（最多 30 分钟）
+0 9 * * * timeout 30m sh -c 'cd /home/opencode/workspace/crontab-ui && /usr/local/bin/opencode run -m opencode/glm-4.7-free "获取最新代码"' >> /tmp/opencode.log 2>&1
+
+# 备份任务（最多 1 小时）
+0 3 * * * timeout 1h /home/opencode/workspace/crontab-ui/scripts/backup.sh >> /tmp/backup.log 2>&1
+```
+
+#### 高级选项
+
+```bash
+# 超时后等待 10 秒，再发送 KILL 信号强制终止
+0 2 * * * timeout -k 10s 1h /path/to/script.sh
+
+# 发送特定信号
+0 2 * * * timeout -s SIGQUIT 10m /path/to/script.sh
+
+# 保留退出状态
+timeout --preserve-status 5m /path/to/script.sh
+```
+
+#### 检测超时
+
+**退出码 124** 表示超时：
+
+```bash
+#!/bin/bash
+# 在脚本中检测超时
+
+timeout 300 /path/to/slow-command
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -eq 124 ]; then
+    echo "[$(date)] 命令超时" >> /var/log/timeout.log
+    exit 1
+fi
+```
+
+#### 监控超时日志
+
+```bash
+# 查找超时的 cron 任务
+grep "exit status 124" /var/log/syslog | grep CRON
+
+# 监控自定义超时日志
+tail -f /var/log/timeout.log
+```
+
 ### 使用 Git Hooks
 
 在 `.git/hooks/post-merge` 中添加自动化任务：
