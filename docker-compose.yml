@@ -1,0 +1,20 @@
+services:
+  crontab-guru:
+    image: napoler/crontab-guru-dashboard:latest
+    build:
+      context: .
+      args:
+        DASHBOARD_USERNAME: ${CRONITOR_USERNAME}
+        DASHBOARD_PASSWORD: ${CRONITOR_PASSWORD}
+    container_name: crontab-guru-dashboard
+    ports:
+      - "9000:9000"
+    volumes:
+      - cronitor-data:/root/.config/cronitor
+      - /etc/cron.d:/etc/cron.d
+      - /var/spool/cron:/var/spool/cron
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+volumes:
+  cronitor-data:
